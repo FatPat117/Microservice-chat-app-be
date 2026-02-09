@@ -1,20 +1,28 @@
-import type { DestinationStream, Logger, LoggerOptions } from 'pino';
+import type { Logger, LoggerOptions } from 'pino';
 import pino from 'pino';
 
-type CreateLoggerOptions = LoggerOptions &{
-  name:string;
-}
+type CreateLoggerOptions = LoggerOptions & {
+  name: string;
+};
 
-export const createLogger = (options:CreateLoggerOptions):Logger => {
-  const {name,...rest} = options;
+export const createLogger = (options: CreateLoggerOptions): Logger => {
+  const { name, ...rest } = options;
 
-  const transport = process.env.NODE_ENV === 'development' ? {
-    target:'pino-pretty',
-    options:{
-      colorize:true,
-      translateTime:'SYS:standard',
-    }
-  } : undefined;
+  const transport =
+    process.env.NODE_ENV === 'development'
+      ? {
+          target: 'pino-pretty',
+          options: {
+            colorize: true,
+            translateTime: 'SYS:standard',
+          },
+        }
+      : undefined;
 
-  return pino({name,level:process.env.LOG_LEVEL || 'info',...rest},transport as unknown as DestinationStream);
+  return pino({
+    name,
+    level: process.env.LOG_LEVEL || 'info',
+    ...rest,
+    transport,
+  });
 }
