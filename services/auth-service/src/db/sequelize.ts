@@ -16,8 +16,8 @@ export const sequelize = new Sequelize(env.AUTH_DB_URL,{
     acquire: 30000,
     idle: 10000,
   },
-}
-)
+})
+
 
 export const connectToDatabase = async () =>{
   try {
