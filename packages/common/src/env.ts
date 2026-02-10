@@ -19,5 +19,4 @@ export const createEnv = <T extends ZodRawShape>(schema:T,options?:EnvOptions):S
   }
   return parsed.data;
 }
-
 export type EnvSchema<T extends ZodRawShape> = ZodObject<T>;

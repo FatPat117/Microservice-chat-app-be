@@ -1,9 +1,11 @@
 import { env } from "@/config/env";
 import { createServer } from "http";
 import { createApp } from "./app";
+import { connectToDatabase } from "./db/sequelize";
 import { logger } from "./utils/logger";
 const main = async () =>{
   try {
+    await connectToDatabase();
     const app = createApp();
     const server = createServer(app);
 
