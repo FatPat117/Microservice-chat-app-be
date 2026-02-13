@@ -13,6 +13,10 @@ const EnvSchema = z.object({
     .default(4003),
   AUTH_DB_URL: z.string().url(),
   AUTH_DB_SSL: z.coerce.boolean().default(false),
+  JWT_SECRET: z.string().min(32),
+  JWT_EXPIRES_IN: z.string().default('1d'),
+  JWT_REFRESH_SECRET: z.string().min(32),
+  JWT_REFRESH_EXPIRES_IN: z.string().default('30d'),
 });
 
 export const env = createEnv(EnvSchema.shape, { serviceName: 'auth-service' });
