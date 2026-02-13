@@ -1,28 +1,22 @@
 import { env } from "@/configs/env";
 import { createServer } from "http";
 import { createApp } from "./app";
-import { connectToDatabase } from "./db/sequelize";
-import { initModels } from "./models";
 import { logger } from "./utils/logger";
 const main = async () =>{
   try {
-    await connectToDatabase();
-    await initModels();
-
-
     const app = createApp();
     const server = createServer(app);
 
-    const port = env.AUTH_SERVICE_PORT;
+    const port = env.GATEWAY_SERVICE_PORT;
 
     server.listen(port,()=>{
-      logger.info(`Auth service is running on port ${port}`);
+      logger.info(`Gateway service is running on port ${port}`);
     });
 
     const shutdown =() =>{
-      logger.info("Shutting down auth service");
+      logger.info("Shutting down gateway service");
       server.close(()=>{
-        logger.info("Auth service shutdown complete");
+        logger.info("Gateway service shutdown complete");
         process.exit(0);
       });
     }

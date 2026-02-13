@@ -1,4 +1,4 @@
-import { env } from '@/config/env';
+import { env } from '@/configs/env';
 import bcrypt from 'bcrypt';
 import jwt, { type Secret, type SignOptions } from 'jsonwebtoken';
 

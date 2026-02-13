@@ -1,4 +1,4 @@
-import { env } from "@/config/env";
+import { env } from "@/configs/env";
 import { logger } from "@/utils/logger";
 import { Sequelize } from "sequelize";
 
