@@ -27,5 +27,4 @@ export const createInternalAuthMiddleware = (expectedToken:string,options:Intern
   next();
   
  }
-
 }
