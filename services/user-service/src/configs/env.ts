@@ -10,8 +10,9 @@ const EnvSchema = z.object({
     .positive()
     .min(0)
     .max(65_535)
-    .default(4000),
+    .default(4000), 
   USER_DB_URL: z.string().url(),
+  USER_DB_SSL: z.coerce.boolean().default(false),
   INTERNAL_API_TOKEN: z.string().min(6),
   RABBITMQ_URL: z.string().url().optional(),
 });

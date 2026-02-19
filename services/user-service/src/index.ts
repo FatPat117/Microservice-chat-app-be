@@ -1,13 +1,13 @@
 import { env } from "@/configs/env";
-import { createInternalAuthMiddleware } from "@chatapp/common";
 import { createServer } from "http";
 import { createApp } from "./app";
+import { connectToDatabase } from "./db/sequelize";
 import { logger } from "./utils/logger";
 const main = async () =>{
   try {
     const app = createApp();
     const server = createServer(app);
-   
+    await connectToDatabase();
     const port = env.USER_SERVICE_PORT;
 
     server.listen(port,()=>{
