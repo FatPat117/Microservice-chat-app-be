@@ -17,7 +17,8 @@ const EnvSchema = z.object({
   JWT_EXPIRES_IN: z.string().default('1d'),
   JWT_REFRESH_SECRET: z.string().min(32),
   JWT_REFRESH_EXPIRES_IN: z.string().default('30d'),
-  INTERNAL_AUTH_TOKEN: z.string().min(16),
+  INTERNAL_API_TOKEN: z.string().min(16),
+  RABBITMQ_URL: z.string().url(),
 });
 
 export const env = createEnv(EnvSchema.shape, { serviceName: 'auth-service' });
