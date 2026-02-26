@@ -22,6 +22,7 @@ export const sequelize = new Sequelize(env.AUTH_DB_URL,{
 export const connectToDatabase = async () =>{
   try {
     await sequelize.authenticate();
+
     logger.info("Auth service Connected to database");
   } catch (error) {
     logger.error(`Auth service Failed to connect to database ${error}`,);

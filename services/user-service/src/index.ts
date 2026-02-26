@@ -1,13 +1,18 @@
 import { env } from "@/configs/env";
 import { createServer } from "http";
 import { createApp } from "./app";
+import { initModels } from "./db";
 import { connectToDatabase } from "./db/sequelize";
+import { startAuthEventConsumer } from "./messaging/auth-consumer";
 import { logger } from "./utils/logger";
 const main = async () =>{
   try {
     const app = createApp();
     const server = createServer(app);
     await connectToDatabase();
+    await initModels();
+    await startAuthEventConsumer();
+
     const port = env.USER_SERVICE_PORT;
 
     server.listen(port,()=>{
