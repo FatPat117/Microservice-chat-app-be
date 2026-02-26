@@ -1,6 +1,7 @@
 import { UserModel } from "@/db";
-import type { User } from "@/types/user";
+import type { CreateUserInput, User } from "@/types/user";
 import type { AuthUserRegisteredPayload } from "@chatapp/common";
+import { Op, WhereOptions } from "sequelize";
 
 const toDomainUser = (model:UserModel):User =>{
  return {
@@ -26,6 +27,34 @@ export class UserRepository{
     return users.map(toDomainUser);
   }
 
+  async create(data: CreateUserInput): Promise<User>{
+    const user = await UserModel.create(data);
+    return toDomainUser(user)
+
+  }
+
+  async searchByQuery(query:string, options:{limit?:number, excludeIds?:string[] } = {}):Promise<User[]>{
+   const where:WhereOptions = {
+    [Op.or]: [
+      { email: { [Op.like]: `%${query}%` } },
+      { displayName: { [Op.like]: `%${query}%` } },
+    ],
+   }
+
+   if(options.excludeIds && options.excludeIds.length > 0){
+      Object.assign(where, {[Op.and]: [
+        { id: { [Op.notIn]: options.excludeIds } },
+      ]});
+   }
+
+   const users = await UserModel.findAll({
+    where,
+    limit:options.limit ?? 10,
+    order:[["createdAt", "DESC"]],
+   });
+   return users.map(toDomainUser);
+  }
+
   async upsertFromAuthEvent(payload:AuthUserRegisteredPayload):Promise<User>{
     const [user] = await UserModel.upsert({
       id:payload.id,
@@ -36,6 +65,7 @@ export class UserRepository{
     },{returning:true});
     return toDomainUser(user);
   }
+  
 }
 
 export const userRepository = new UserRepository();

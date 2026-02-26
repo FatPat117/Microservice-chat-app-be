@@ -4,6 +4,7 @@ import { createApp } from "./app";
 import { initModels } from "./db";
 import { connectToDatabase } from "./db/sequelize";
 import { startAuthEventConsumer } from "./messaging/auth-consumer";
+import { initMessaging } from "./messaging/event-publisher";
 import { logger } from "./utils/logger";
 const main = async () =>{
   try {
@@ -12,6 +13,7 @@ const main = async () =>{
     await connectToDatabase();
     await initModels();
     await startAuthEventConsumer();
+    await initMessaging()
 
     const port = env.USER_SERVICE_PORT;
 
