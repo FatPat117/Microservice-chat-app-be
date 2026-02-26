@@ -78,5 +78,31 @@ export const authProxyService ={
     } catch (error) {
       return handleAxiosError(error);
     }
-  }
+  },
+
+  async login(payload:LoginPayload):Promise<AuthResponse>{
+    try {
+      const response = await client.post<AuthResponse>('/auth/login', payload, authHeader );
+      return response.data;
+    } catch (error) {
+      return handleAxiosError(error);
+    }
+  },
+
+  async refreshTokens(payload:RefreshTokenPayload):Promise<AuthResponse>{ 
+    try {
+      const response = await client.post<AuthResponse>('/auth/refresh', payload, authHeader );
+      return response.data;
+    } catch (error) {
+      return handleAxiosError(error);
+    }
+  },
+
+  async revokeRefreshToken(payload:RevokePayload):Promise<void>{
+    try {
+      await client.post('/auth/revoke', payload, authHeader );
+    } catch (error) {
+      return handleAxiosError(error);
+    }
+  } 
 }
