@@ -1,4 +1,4 @@
-import { EventPayload, OutboundEvent } from "./event-types";
+import { EventPayload, OutboundEvent } from './event-types';
 
 export const USER_EVENT_EXCHANGE='user.events';
 export const USER_CREATED_ROUTING_KEY='user.created';
