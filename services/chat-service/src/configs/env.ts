@@ -14,7 +14,7 @@ const EnvSchema = z.object({
     JWT_SECRET: z.string().min(6),
     INTERNAL_API_TOKEN: z.string().min(6),
     RABBITMQ_URL: z.string().url().optional(),
-    MONGO_URL: z.string().url().optional(),
+    MONGO_URL: z.string().url(),
     REDIS_URL: z.string().url().optional(),
 });
 

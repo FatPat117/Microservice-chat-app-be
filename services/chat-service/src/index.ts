@@ -1,11 +1,13 @@
 import { env } from "@/configs/env";
 import { createServer } from "http";
 import { createApp } from "./app";
+import { getMongoClient } from "./clients/mongo.client";
 import { logger } from "./utils/logger";
 const main = async () =>{
   try {
     const app = createApp();
     const server = createServer(app);
+    await Promise.all([getMongoClient()]);
 
     const port = env.CHAT_SERVICE_PORT;
 
