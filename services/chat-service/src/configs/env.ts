@@ -15,7 +15,7 @@ const EnvSchema = z.object({
     INTERNAL_API_TOKEN: z.string().min(6),
     RABBITMQ_URL: z.string().url().optional(),
     MONGO_URL: z.string().url(),
-    REDIS_URL: z.string().url().optional(),
+    REDIS_URL: z.string().url(),
 });
 
 export const env = createEnv(EnvSchema.shape, { serviceName: 'chat-service' });

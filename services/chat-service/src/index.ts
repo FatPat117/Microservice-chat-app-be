@@ -1,13 +1,14 @@
 import { env } from "@/configs/env";
 import { createServer } from "http";
 import { createApp } from "./app";
-import { getMongoClient } from "./clients/mongo.client";
+import { disconnectFromMongo, getMongoClient } from "./clients/mongo.client";
+import { connectRedis, disconnectFromRedis } from "./clients/redis.client";
 import { logger } from "./utils/logger";
 const main = async () =>{
   try {
     const app = createApp();
     const server = createServer(app);
-    await Promise.all([getMongoClient()]);
+    await Promise.all([getMongoClient(),connectRedis()]);
 
     const port = env.CHAT_SERVICE_PORT;
 
@@ -16,6 +17,7 @@ const main = async () =>{
     });
 
     const shutdown =() =>{
+      Promise.all([disconnectFromMongo(),disconnectFromRedis()]);
       logger.info("Shutting down chat service");
       server.close(()=>{
         logger.info("Chat service shutdown complete");
