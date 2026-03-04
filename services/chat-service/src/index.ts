@@ -3,12 +3,13 @@ import { createServer } from "http";
 import { createApp } from "./app";
 import { disconnectFromMongo, getMongoClient } from "./clients/mongo.client";
 import { connectRedis, disconnectFromRedis } from "./clients/redis.client";
+import { startConsumers, stopConsumers } from "./messaging/rabbitmq.consumer";
 import { logger } from "./utils/logger";
 const main = async () =>{
   try {
     const app = createApp();
     const server = createServer(app);
-    await Promise.all([getMongoClient(),connectRedis()]);
+    await Promise.all([getMongoClient(),connectRedis(),startConsumers()]);
 
     const port = env.CHAT_SERVICE_PORT;
 
@@ -17,8 +18,8 @@ const main = async () =>{
     });
 
     const shutdown =() =>{
-      Promise.all([disconnectFromMongo(),disconnectFromRedis()]);
-      logger.info("Shutting down chat service");
+      Promise.all([disconnectFromMongo(),disconnectFromRedis(),stopConsumers()]);
+      logger.info("Shutting down chat srvice"); 
       server.close(()=>{
         logger.info("Chat service shutdown complete");
         process.exit(0);
