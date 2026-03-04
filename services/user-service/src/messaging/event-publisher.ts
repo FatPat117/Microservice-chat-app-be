@@ -106,7 +106,7 @@ export const publishUserCreatedEvent = async (payload:UserCreatedPayload) =>{
 
     if(!success){
       logger.warn({event}, 'User service: Failed to publish user created event');
-      return;``
+      return;
     }
     logger.info({event}, 'User service: User created event published successfully');
   } catch (error) {

@@ -12,8 +12,21 @@ type ManageConnection = Connection & ChannelModel
 let connectionRef:ManageConnection | null = null;
 let channel:Channel | null = null;
 let consumerTag:string | null = null;
+const RABBITMQ_RETRY_DELAY_MS = 3000;
 
 const QUEUE_NAME ='auth-service.auth-events'
+const sleep = (ms:number) => new Promise((resolve) => setTimeout(resolve, ms));
+
+const connectWithRetry = async (url:string): Promise<ManageConnection> => {
+  while (true) {
+    try {
+      return await amqplib.connect(url) as unknown as ManageConnection;
+    } catch (error) {
+      logger.error({ err: error }, "User service: Failed to connect RabbitMQ, retrying...");
+      await sleep(RABBITMQ_RETRY_DELAY_MS);
+    }
+  }
+}
 
 /**
  * Xử lý từng message nhận được từ queue.
@@ -48,7 +61,7 @@ export const startAuthEventConsumer = async () =>{
     return;
   }
 
-  const connection = await amqplib.connect(env.RABBITMQ_URL) as unknown as ManageConnection;
+  const connection = await connectWithRetry(env.RABBITMQ_URL);
   connectionRef = connection ;
   channel = await connection.createChannel();
  
@@ -84,8 +97,7 @@ export const startAuthEventConsumer = async () =>{
   consumerTag = result.consumerTag;
   
   connection.on("error",(error)=>{
-    logger.error("User service: RabbitMQ connection error", error);
-    process.exit(1);
+    logger.error({ err: error }, "User service: RabbitMQ connection error");
   });
   
   connection.on("close",()=>{

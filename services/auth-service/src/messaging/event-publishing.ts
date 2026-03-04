@@ -5,6 +5,20 @@ import { connect, type Channel, type ChannelModel } from "amqplib";
 
 let connectionRef:ChannelModel |null = null;
 let channel:Channel |null = null;
+const RABBITMQ_RETRY_DELAY_MS = 3000;
+
+const sleep = (ms:number) => new Promise((resolve) => setTimeout(resolve, ms));
+
+const connectWithRetry = async (url:string): Promise<ChannelModel> => {
+  while (true) {
+    try {
+      return await connect(url);
+    } catch (error) {
+      logger.error({ err: error }, "Auth service: Failed to connect RabbitMQ, retrying...");
+      await sleep(RABBITMQ_RETRY_DELAY_MS);
+    }
+  }
+}
 
 export const initPublisher = async () =>{
   if(!env.RABBITMQ_URL){
@@ -16,7 +30,7 @@ export const initPublisher = async () =>{
     return;
   }
 
-  const connection = await connect(env.RABBITMQ_URL);
+  const connection = await connectWithRetry(env.RABBITMQ_URL);
   connectionRef = connection;
   channel = await connection.createChannel();
 
@@ -26,8 +40,7 @@ export const initPublisher = async () =>{
   logger.info("Auth service: Event publishing initialized");
 
   connection.on("error",(error)=>{
-    logger.error("Auth service: RabbitMQ connection error", error);
-    process.exit(1);
+    logger.error({ err: error }, "Auth service: RabbitMQ connection error");
   });
 
   connection.on("close",()=>{

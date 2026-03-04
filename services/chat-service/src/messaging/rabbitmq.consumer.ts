@@ -15,6 +15,20 @@ let channel:Channel | null = null;
 let consumerTag:string | null = null;
 
 const EVENT_QUEUE_NAME = "chat-service.user-events"
+const RABBITMQ_RETRY_DELAY_MS = 3000;
+
+const sleep = (ms:number) => new Promise((resolve) => setTimeout(resolve, ms));
+
+const connectWithRetry = async (url:string): Promise<ManageConnection> => {
+  while (true) {
+    try {
+      return await connect(url) as unknown as ManageConnection;
+    } catch (error) {
+      logger.error({ err: error }, "Chat service: Failed to connect RabbitMQ, retrying...");
+      await sleep(RABBITMQ_RETRY_DELAY_MS);
+    }
+  }
+}
 
 export const closeAmqpConnection = async (connection:ManageConnection) =>{
   await connection.close();
@@ -34,7 +48,7 @@ export const startConsumers = async () =>{
     return;
   }
 
-  const connection = await connect(env.RABBITMQ_URL) as unknown as ManageConnection;
+  const connection = await connectWithRetry(env.RABBITMQ_URL);
   connectionRef = connection;
   channel = await connection.createChannel();
 
@@ -69,8 +83,7 @@ export const startConsumers = async () =>{
   logger.info("Chat service: User created consumer started");
 
   connection.on("error",(error)=>{
-    logger.error("Chat service: RabbitMQ connection error", error);
-    process.exit(1);
+    logger.error({ err: error }, "Chat service: RabbitMQ connection error");
   });
   
   connection.on("close",()=>{
