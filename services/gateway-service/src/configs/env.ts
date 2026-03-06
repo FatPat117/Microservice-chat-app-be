@@ -13,6 +13,7 @@ const EnvSchema = z.object({
     .default(4000),
    AUTH_SERVICE_URL: z.string().url(),
    USER_SERVICE_URL: z.string().url(),
+   CHAT_SERVICE_URL: z.string().url(),
    INTERNAL_API_TOKEN: z.string().min(6),
    JWT_SECRET: z.string().min(6),
 
