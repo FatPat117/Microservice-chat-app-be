@@ -3,13 +3,12 @@ import axios, { AxiosInstance, AxiosRequestConfig } from "axios";
 import { env } from "@/configs/env";
 import { HttpError, USER_ID_HEADER } from "@chatapp/common";
 
+const INTERNAL_TOKEN_HEADER = "x-internal-token";
+
 const createClient = ():AxiosInstance =>{
   const config: AxiosRequestConfig = {
     baseURL: env.CHAT_SERVICE_URL,
     timeout:5000,
-    headers:{
-      'X-Internal-Token': env.INTERNAL_API_TOKEN
-    }
   } as const;
   return axios.create(config);
 }
@@ -87,6 +86,12 @@ export interface CreateMessagePayload{
   body:string
 }
 
+export interface ListConversationsParams {
+  participantId?: string;
+  limit?: number;
+  offset?: number;
+}
+
 export const chatProxyService = {
   async createConversation(userId:string,
     payload: CreateConversationPayload
@@ -94,7 +99,8 @@ export const chatProxyService = {
     try {
       const response = await client.post<ConversationResponse>(`/conversations`, payload, {
         headers:{
-          [USER_ID_HEADER]: userId
+          [INTERNAL_TOKEN_HEADER]: env.INTERNAL_API_TOKEN,
+          [USER_ID_HEADER]: userId,
         },
       } );
       return response.data.data
@@ -103,13 +109,17 @@ export const chatProxyService = {
     }
   },
 
-  async listConversations(userId:string,
+  async listConversations(
+    userId:string,
+    params?: ListConversationsParams
   ): Promise<ConversationDto[]>{
       try {
         const response = await client.get<ConversationsResponse>(`/conversations`, {
           headers:{
-            [USER_ID_HEADER]: userId
+            [INTERNAL_TOKEN_HEADER]: env.INTERNAL_API_TOKEN,
+            [USER_ID_HEADER]: userId,
           },
+          params,
         } );
         return response.data.data;
       } catch (error) {
@@ -121,7 +131,8 @@ export const chatProxyService = {
       try {
         const response = await client.get<ConversationResponse>(`/conversations/${conversationId}`, {
           headers:{
-            [USER_ID_HEADER]: userId
+            [INTERNAL_TOKEN_HEADER]: env.INTERNAL_API_TOKEN,
+            [USER_ID_HEADER]: userId,
           },
         } );
         return response.data.data;
@@ -132,11 +143,16 @@ export const chatProxyService = {
 
     async touchConversation(conversationId:string, userId:string, preview:string): Promise<void>{
       try {
-        await client.post<void>(`/conversations/${conversationId}/touch`, {
-          headers:{
-            [USER_ID_HEADER]: userId
-          },
-        } );
+        await client.post<void>(
+          `/conversations/${conversationId}/touch`,
+          { preview },
+          {
+            headers: {
+              [INTERNAL_TOKEN_HEADER]: env.INTERNAL_API_TOKEN,
+              [USER_ID_HEADER]: userId,
+            },
+          }
+        );
       } catch (error) {
         return handleAxiosError(error);
       }

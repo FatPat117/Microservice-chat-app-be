@@ -1,6 +1,10 @@
 import { getMongoClient } from "@/clients/mongo.client";
-import type { Conversation, ConversationFilter, ConversationSummary, CreateConversationInput } from "@/types/conversation";
-import { randomUUID } from "crypto";
+import type {
+  Conversation,
+  ConversationFilter,
+  ConversationSummary,
+  CreateConversationInput,
+} from "@/types/conversation";
 import { ObjectId, type Collection, type WithId } from "mongodb";
 
 const CONVERSATIONS_COLLECTION = "conversations";
@@ -37,20 +41,21 @@ export const conversationRepository = {
   async create(input : CreateConversationInput):Promise<Conversation>{
     const client = await getMongoClient();
     const db = client.db();
-    const collection = db.collection(CONVERSATIONS_COLLECTION);
+    const collection = db.collection<ConversationDocument>(CONVERSATIONS_COLLECTION);
     const now = new Date();
-    const conversationId = randomUUID();
-    const document = {
-      _id: new ObjectId(conversationId) ,
-      title:input.title ?? null,
-      participantIds:input.participantIds,
-      createdAt:now,
-      updateAt:now,
-      lastMessageAt:null,
-      lastMessagePreview:null,
-    }
-    await collection.insertOne(document as unknown as ConversationDocument);
-    return toConversation(document as unknown as WithId<ConversationDocument>);
+
+    const document: ConversationDocument = {
+      _id: new ObjectId(), // let Mongo generate a valid ObjectId
+      title: input.title ?? null,
+      participantIds: input.participantIds,
+      createdAt: now,
+      updateAt: now,
+      lastMessageAt: null,
+      lastMessagePreview: null,
+    };
+
+    await collection.insertOne(document);
+    return toConversation(document as WithId<ConversationDocument>);
   },
   async findConversationById(conversationId:string):Promise<Conversation | null>{
     const client = await getMongoClient();
@@ -63,7 +68,12 @@ export const conversationRepository = {
     const client = await getMongoClient();
     const db = client.db();
     const collection = db.collection(CONVERSATIONS_COLLECTION);
-    const result = await collection.find({ participantId: filter.participantId }).sort({ lastMessageAt: -1, updateAt: -1 }).toArray();
+    const result = await collection
+      .find({ participantIds: filter.participantId })
+      .sort({ lastMessageAt: -1, updateAt: -1 })
+      .skip(filter.offset ?? 0)
+      .limit(filter.limit ?? 10)
+      .toArray();
     return result.map((doc) => toConversation(doc as unknown as WithId<ConversationDocument>));
   },
   async touchConversation(conversationId:string,preview:string):Promise<void>{

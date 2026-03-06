@@ -56,7 +56,11 @@ export const validateRequest = (schemas: RequestValidationSchemas) => {
 
       if (schemas.query) {
         const parsedQuery = schemas.query.parse(req.query) as QueryRecord;
-        req.query = parsedQuery as Request['query'];
+        const currentQuery = req.query as QueryRecord;
+        for (const key of Object.keys(currentQuery)) {
+          delete currentQuery[key];
+        }
+        Object.assign(currentQuery, parsedQuery);
       }
 
       next();

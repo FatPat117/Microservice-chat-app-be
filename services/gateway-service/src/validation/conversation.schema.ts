@@ -1,11 +1,15 @@
 import { z } from "@chatapp/common";
 
-export const createConversationSchema = z.object({
+export const createConversationBodySchema = z.object({
   title:z.string().min(1).max(255).optional(),
   participantIds:z.array(z.string().uuid()).min(1),
 })
 
-export const listConversationQuerySchema = z.object({
+export const conversationIdParamsSchema = z.object({
+  conversationId:z.string().regex(/^[a-fA-F0-9]{24}$/, "Invalid MongoDB ObjectId"),
+})
+
+export const listConversationsQuerySchema = z.object({
   participantId:z.preprocess(
     (value) => (value === "" ? undefined : value),
     z.string().uuid().optional()

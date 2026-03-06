@@ -48,7 +48,7 @@ export const getConversationById : AsyncHandler = async (req, res, next) => {
   const conversationId = parsedConversation(req.params);
   const conversation = await ConversationService.getConversationById(conversationId);
 
-  if(conversation.participantIds.includes(user.id)){
+  if(!conversation.participantIds.includes(user.id)){
     throw new HttpError(403, "You are not authorized to get this conversation");
   }
   
