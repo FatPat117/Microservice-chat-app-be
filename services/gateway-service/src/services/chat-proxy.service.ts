@@ -157,4 +157,53 @@ export const chatProxyService = {
         return handleAxiosError(error);
       }
     },
+
+    async createMessage(conversationId:string, userId:string, payload: CreateMessagePayload): Promise<MessageDto>{
+      try {
+        const response = await client.post<MessagesResponse>(`/conversations/${conversationId}/messages`, payload, {
+          headers:{
+            [INTERNAL_TOKEN_HEADER]: env.INTERNAL_API_TOKEN,
+            [USER_ID_HEADER]: userId,
+          },
+        } );
+        return response.data.data;
+      } catch (error) {
+        return handleAxiosError(error);
+      }
+    },
+
+    async listMessages(conversationId:string, userId:string, query?:{
+      limit?: number;
+      after?: Date;
+    }): Promise<MessageDto[]>{
+      try {
+        const response = await client.get<MessagesListResponse>(`/conversations/${conversationId}/messages`, {
+          headers:{
+            [INTERNAL_TOKEN_HEADER]: env.INTERNAL_API_TOKEN,
+            [USER_ID_HEADER]: userId,
+          },
+          params:{
+            limit: query?.limit ?? 10,
+            after: query?.after ? query.after.toISOString() : undefined,
+          },
+        } );
+        return response.data.data;
+      } catch (error) {
+        return handleAxiosError(error);
+      }
+    },
+
+    async getMessageById(messageId:string, userId:string,conversationId:string): Promise<MessageDto>{
+      try {
+        const response = await client.get<MessagesResponse>(`/conversations/${conversationId}/messages/${messageId}`, {
+          headers:{
+            [INTERNAL_TOKEN_HEADER]: env.INTERNAL_API_TOKEN,
+            [USER_ID_HEADER]: userId,
+          },
+        } );
+        return response.data.data;
+      } catch (error) {
+        return handleAxiosError(error);
+      }
+    },
 }

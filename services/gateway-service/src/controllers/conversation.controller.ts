@@ -1,6 +1,6 @@
 import { chatProxyService } from "@/services/chat-proxy.service";
 import { getAuthenticatedUser } from "@/utils/auth";
-import { conversationIdParamsSchema, createConversationBodySchema, listConversationsQuerySchema } from "@/validation/conversation.schema";
+import { conversationIdParamsSchema, createConversationBodySchema, createMessageBodySchema, listConversationsQuerySchema, listMessagesQuerySchema, messageIdParamsSchema } from "@/validation/conversation.schema";
 import { AsyncHandler, HttpError } from "@chatapp/common";
 
 export const createConversation:AsyncHandler = async (req, res, next) => {
@@ -69,3 +69,40 @@ export const touchConversation:AsyncHandler = async (req, res, next) => {
     return next(error);
   }
 }
+
+  export const createMessage:AsyncHandler = async (req, res, next) => {
+    try {
+      const {conversationId} = conversationIdParamsSchema.parse(req.params);
+      const userId = getAuthenticatedUser(req).id;
+      const payload = createMessageBodySchema.parse(req.body);
+      const message = await chatProxyService.createMessage(conversationId, userId, payload);
+      res.status(201).json({data:message});
+    } catch (error) {
+      return next(error);
+    }
+  } 
+
+  export const listMessages:AsyncHandler = async (req, res, next) => {
+    try {
+      const {conversationId} = conversationIdParamsSchema.parse(req.params);
+      const userId = getAuthenticatedUser(req).id;
+      const {limit, after} = listMessagesQuerySchema.parse(req.query as unknown);
+      const messages = await chatProxyService.listMessages(conversationId, userId, {limit, after});
+      res.status(200).json({data:messages});
+    } catch (error) {
+      return next(error);
+    }
+  }
+
+  export const getMessageById:AsyncHandler = async (req, res, next) => {
+    try {
+      const {messageId} = messageIdParamsSchema.parse(req.params);
+      const userId = getAuthenticatedUser(req).id;
+      const {conversationId} = conversationIdParamsSchema.parse(req.params);
+      const message = await chatProxyService.getMessageById(messageId, userId, conversationId);
+      res.status(200).json({data:message});
+    } catch (error) {
+      return next(error);
+    }
+  }
+
