@@ -116,6 +116,32 @@ services:
       timeout: 5s
       retries: 5
       start_period: 15s
+  gateway-service:
+    build:
+      context: .
+      dockerfile: services/gateway-service/Dockerfile
+    container_name: chatapp-gateway-service
+    env_file:
+      - services/gateway-service/.env
+    environment:
+      AUTH_SERVICE_URL: http://chatapp-auth-service:4003
+      USER_SERVICE_URL: http://chatapp-user-service:4001
+      CHAT_SERVICE_URL: http://chatapp-chat-service:4002
+      INTERNAL_API_TOKEN: ${INTERNAL_API_TOKEN:-super-secret-token}
+      JWT_SECRET: ${JWT_SECRET:-super-jwt-secret}
+    depends_on:
+      - auth-service
+      - user-service
+    ports:
+      - ${GATEWAY_SERVICE_PORT:-4000}:4000
+    networks:
+      - chatapp-network
+    healthcheck:
+      test: ["CMD-SHELL", "curl -fsS http://localhost:4000/health || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 15s
 volumes:
   user-db-data:
   auth-db-data:
