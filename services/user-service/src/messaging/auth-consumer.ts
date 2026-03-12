@@ -1,16 +1,16 @@
 import { env } from "@/configs/env";
 import { userService } from "@/services/user.service";
 import { logger } from "@/utils/logger";
-import { AUTH_EVENT_EXCHANGE, AUTH_USER_REGISTER_ROUTING_KEY, AuthUserRegisteredPayload, InboundEvent } from "@chatapp/common";
-import amqplib, { type Channel, type ChannelModel, type Connection, type ConsumeMessage, type Replies } from "amqplib";
-type ManageConnection = Connection & ChannelModel
+import { AUTH_EVENT_EXCHANGE, AUTH_USER_REGISTER_ROUTING_KEY } from "@chatapp/common";
+import amqplib from "amqplib";
+type ManageConnection = any;
 
 /*
  * Module-level state: giữ reference tới connection, channel, consumerTag
  * để có thể cleanup (graceful shutdown) khi service dừng.
  */
 let connectionRef:ManageConnection | null = null;
-let channel:Channel | null = null;
+let channel:any | null = null;
 let consumerTag:string | null = null;
 const RABBITMQ_RETRY_DELAY_MS = 3000;
 
@@ -34,9 +34,9 @@ const connectWithRetry = async (url:string): Promise<ManageConnection> => {
  * Luồng: raw bytes → JSON parse → gọi userService.syncFromAuthUser → ack
  * Nếu hàm này throw, caller (consumerHandler) sẽ nack message.
  */
-const handleMessage = async (message:ConsumeMessage,channel:Channel) =>{
+const handleMessage = async (message:any,channel:any) =>{
   const raw = message.content.toString('utf-8');
-  const event = JSON.parse(raw) as InboundEvent<typeof AUTH_USER_REGISTER_ROUTING_KEY, AuthUserRegisteredPayload>;
+  const event = JSON.parse(raw) as { payload: { id:string; email:string; displayName:string; createdAt:string } };
 
   const user = await userService.syncFromAuthUser(event.payload);
   channel.ack(message)
@@ -82,7 +82,7 @@ export const startAuthEventConsumer = async () =>{
    * - Thành công → ack (xóa message khỏi queue)
    * - Thất bại  → nack(requeue=false) (chuyển vào dead-letter hoặc discard)
    */
-  const consumerHandler = (message:ConsumeMessage | null) =>{
+  const consumerHandler = (message:any | null) =>{
     if(!message){
       return;
     }
@@ -93,7 +93,7 @@ export const startAuthEventConsumer = async () =>{
   }
   
   // noAck=false: bắt buộc phải ack/nack thủ công (đảm bảo message không mất nếu xử lý lỗi)
-  const result: Replies.Consume = await channel.consume(queue.queue, consumerHandler, { noAck: false });
+  const result = await channel.consume(queue.queue, consumerHandler, { noAck: false });
   consumerTag = result.consumerTag;
   
   connection.on("error",(error)=>{

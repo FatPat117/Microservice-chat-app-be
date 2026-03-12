@@ -6,16 +6,16 @@ import { AuthResponse, AuthToken, LoginInput, RegisterInput } from "@/types/auth
 import { hashPassword, signAccessToken, signRefreshToken, verifyPassword, verifyRefreshToken } from "@/utils/token";
 import { HttpError } from "@chatapp/common";
 import crypto from "crypto";
-import { Op, Transaction } from "sequelize";
+import { Op } from "sequelize";
 
-const REFRESH_TOKEN_TTL_DAYS=30
-const createRefreshToken = async (userId:string, transaction?:Transaction): Promise<RefreshTokenAttributes>  => {
+const REFRESH_TOKEN_TTL_DAYS=30;
+const createRefreshToken = async (userId:string, transaction?:unknown): Promise<RefreshTokenAttributes>  => {
   const expiresAt = new Date(Date.now());
   expiresAt.setDate(expiresAt.getDate() + REFRESH_TOKEN_TTL_DAYS); // 30 days from now
 
   const tokenId = crypto.randomUUID();
 
-  const record = await RefreshToken.create(
+  const record = await (RefreshToken as any).create(
 {    userId,
     tokenId,
     expiresAt},{
@@ -27,7 +27,7 @@ return record;
 }
 
 export const register = async (input: RegisterInput): Promise<AuthResponse> => {
-  const existingUser = await UserCredentials.findOne({
+  const existingUser = await (UserCredentials as any).findOne({
     where: { email: { [Op.eq]: input.email } },
   });
   
@@ -39,7 +39,7 @@ export const register = async (input: RegisterInput): Promise<AuthResponse> => {
 
   try {
     const passwordHash = await hashPassword(input.password);
-    const user = await UserCredentials.create({
+    const user = await (UserCredentials as any).create({
       email: input.email,
       displayName: input.displayName,
       passwordHash,
@@ -74,7 +74,7 @@ export const register = async (input: RegisterInput): Promise<AuthResponse> => {
 
 
 export const login = async (input: LoginInput): Promise<AuthResponse> => {
-  const credential = await UserCredentials.findOne({
+  const credential = await (UserCredentials as any).findOne({
     where: { email: { [Op.eq]: input.email } },
   });
   
@@ -111,7 +111,7 @@ export const login = async (input: LoginInput): Promise<AuthResponse> => {
 export const refreshTokens = async (refreshToken:string): Promise<AuthToken> => {
   const payload = verifyRefreshToken(refreshToken);
 
-  const tokenRecord = await RefreshToken.findOne({
+  const tokenRecord = await (RefreshToken as any).findOne({
     where: { tokenId: payload.tokenId,userId: payload.sub },
   });
   
@@ -126,7 +126,7 @@ export const refreshTokens = async (refreshToken:string): Promise<AuthToken> => 
   }
 
   //  Check user is still valid
-  const credential = await UserCredentials.findOne({
+  const credential = await (UserCredentials as any).findOne({
     where: { id: payload.sub },
   });
   
@@ -147,7 +147,7 @@ export const refreshTokens = async (refreshToken:string): Promise<AuthToken> => 
 }
 
 export const revokeRefreshToken = async (userId:string): Promise<void> => {
-  await RefreshToken.destroy({
+  await (RefreshToken as any).destroy({
     where: { userId: userId },
   });
 }

@@ -1,4 +1,3 @@
-import type { Logger } from "@chatapp/common";
 import { createLogger } from "@chatapp/common";
 
-export const logger:Logger = createLogger({name:"auth-service"});
+export const logger = createLogger({name:"auth-service"});

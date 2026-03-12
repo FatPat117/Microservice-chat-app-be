@@ -1,4 +1,4 @@
-import { DataTypes, Model, type Optional } from "sequelize";
+import { DataTypes, Model } from "sequelize";
 import { sequelize } from "../db/sequelize";
 
 export interface UserCredentialsAttributes{
@@ -10,7 +10,7 @@ export interface UserCredentialsAttributes{
   updatedAt:Date,
 }
 
-export type UserCredentialsCreationAttributes = Optional<UserCredentialsAttributes, "id" | "createdAt" | "updatedAt">;
+export type UserCredentialsCreationAttributes = Partial<UserCredentialsAttributes>;
 
 export class UserCredentials extends Model<UserCredentialsAttributes, UserCredentialsCreationAttributes> implements UserCredentialsAttributes{
   declare id: string;
@@ -21,7 +21,7 @@ export class UserCredentials extends Model<UserCredentialsAttributes, UserCreden
   declare updatedAt: Date;
 }
 
-UserCredentials.init({
+(UserCredentials as typeof Model).init({
   id: {
     type: DataTypes.UUID,
     primaryKey: true,

@@ -66,6 +66,56 @@ services:
       - chatapp-network
     volumes:
       - redis-data:/data
+
+  auth-service:
+    build:
+      context: .
+      dockerfile: services/auth-service/Dockerfile
+    container_name: chatapp-auth-service
+    env_file:
+      - services/auth-service/.env
+    environment:
+      AUTH_DB_URL: mysql://chatapp_auth_user:chatapp_auth_password@chatapp-auth-db:3306/chatapp_auth-service
+      AUTH_DB_SSL: "false"
+      RABBITMQ_URL: amqp://chatapp_user:chatapp_password@chatapp-rabbitmq:5672/
+    depends_on:
+      - auth-db
+      - rabbitmq
+    ports:
+      - ${AUTH_SERVICE_PORT:-4003}:4003
+    networks:
+      - chatapp-network
+    healthcheck:
+      test: ["CMD-SHELL", "curl -fsS http://localhost:4003/health || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 15s
+
+  user-service:
+    build:
+      context: .
+      dockerfile: services/user-service/Dockerfile
+    container_name: chatapp-user-service
+    env_file:
+      - services/user-service/.env
+    environment:
+      USER_DB_URL: postgresql://chatapp_user_service:chatapp_password@chatapp-user-db:5432/chatapp_user_service
+      USER_DB_SSL: "false"
+      RABBITMQ_URL: amqp://chatapp_user:chatapp_password@chatapp-rabbitmq:5672/
+    depends_on:
+      - user-db
+      - rabbitmq
+    ports:
+      - ${USER_SERVICE_PORT:-4001}:4001
+    networks:
+      - chatapp-network
+    healthcheck:
+      test: ["CMD-SHELL", "curl -fsS http://localhost:4001/users/health || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 15s
 volumes:
   user-db-data:
   auth-db-data:

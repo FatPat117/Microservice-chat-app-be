@@ -1,5 +1,5 @@
-import { RequestHandler } from "express";
-import { HttpError } from "../errors/http-error";
+import { type NextFunction, type Request, type RequestHandler, type Response } from "express";
+import { HttpError } from "../errors/http-error.js";
 
 /**
  * Tuỳ chọn cho middleware xác thực nội bộ giữa các service.
@@ -41,7 +41,7 @@ export const createInternalAuthMiddleware = (
   const headerName = options.headerName?.toLowerCase() ?? DEFAULT_HEADER_NAME;
   const exemptPath = new Set(options.exemptPath ?? []);
 
-  return (req, _res, next) => {
+  return (req: Request, _res: Response, next: NextFunction) => {
     if (exemptPath.has(req.path)) {
       return next();
     }

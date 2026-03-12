@@ -1,15 +1,15 @@
 import { env } from "@/configs/env";
 import { logger } from "@/utils/logger";
-import { AUTH_EVENT_EXCHANGE, AUTH_USER_REGISTER_ROUTING_KEY, AuthUserRegisteredPayload, OutboundEvent } from "@chatapp/common";
-import { connect, type Channel, type ChannelModel } from "amqplib";
+import { AUTH_EVENT_EXCHANGE, AUTH_USER_REGISTER_ROUTING_KEY } from "@chatapp/common";
+import { connect } from "amqplib";
 
-let connectionRef:ChannelModel |null = null;
-let channel:Channel |null = null;
+let connectionRef: any | null = null;
+let channel: any | null = null;
 const RABBITMQ_RETRY_DELAY_MS = 3000;
 
 const sleep = (ms:number) => new Promise((resolve) => setTimeout(resolve, ms));
 
-const connectWithRetry = async (url:string): Promise<ChannelModel> => {
+const connectWithRetry = async (url:string): Promise<any> => {
   while (true) {
     try {
       return await connect(url);
@@ -39,7 +39,7 @@ export const initPublisher = async () =>{
 
   logger.info("Auth service: Event publishing initialized");
 
-  connection.on("error",(error)=>{
+  connection.on("error",(error: unknown)=>{
     logger.error({ err: error }, "Auth service: RabbitMQ connection error");
   });
 
@@ -51,7 +51,12 @@ export const initPublisher = async () =>{
 }
 
 
-export const publishUserRegisteredEvent = async (payload:AuthUserRegisteredPayload) =>{
+export const publishUserRegisteredEvent = async (payload:{
+  id:string;
+  email:string;
+  displayName:string;
+  createdAt:string;
+}) =>{
   if(!channel || !connectionRef){
     logger.warn("Auth service: Event publishing not initialized, skipping event publication");
     return;
@@ -64,7 +69,7 @@ export const publishUserRegisteredEvent = async (payload:AuthUserRegisteredPaylo
     metadata:{
       version: 1
     }
-  } as OutboundEvent<typeof AUTH_USER_REGISTER_ROUTING_KEY, AuthUserRegisteredPayload>;
+  };
 
   const published = await channel.publish(AUTH_EVENT_EXCHANGE,AUTH_USER_REGISTER_ROUTING_KEY,Buffer.from(JSON.stringify(events)),{contentType:"application/json",persistent:true});
 

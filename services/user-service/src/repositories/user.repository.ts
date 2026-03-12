@@ -1,7 +1,6 @@
 import { UserModel } from "@/db";
 import type { CreateUserInput, User } from "@/types/user";
-import type { AuthUserRegisteredPayload } from "@chatapp/common";
-import { Op, WhereOptions } from "sequelize";
+import { Op } from "sequelize";
 
 const toDomainUser = (model:UserModel):User =>{
  return {
@@ -34,7 +33,7 @@ export class UserRepository{
   }
 
   async searchByQuery(query:string, options:{limit?:number, excludeIds?:string[] } = {}):Promise<User[]>{
-   const where:WhereOptions = {
+   const where:any = {
     [Op.or]: [
       { email: { [Op.like]: `%${query}%` } },
       { displayName: { [Op.like]: `%${query}%` } },
@@ -55,7 +54,12 @@ export class UserRepository{
    return users.map(toDomainUser);
   }
 
-  async upsertFromAuthEvent(payload:AuthUserRegisteredPayload):Promise<User>{
+  async upsertFromAuthEvent(payload:{
+    id:string;
+    email:string;
+    displayName:string;
+    createdAt:string;
+  }):Promise<User>{
     const [user] = await UserModel.upsert({
       id:payload.id,
       email:payload.email,

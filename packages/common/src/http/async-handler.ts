@@ -38,7 +38,7 @@ const forwardError = (nextFn: ErrorForwarder, error: unknown): void => {
  * - Tự `.catch` lỗi async và forward về middleware lỗi qua `next(err)`.
  */
 export const asyncHandler = (handler: AsyncHandler): RequestHandler => {
-  return (req, res, next) => {
+  return (req: Request, res: Response, next: NextFunction) => {
     handler(req, res, next).catch(err => forwardError(next, err));
   };
 };

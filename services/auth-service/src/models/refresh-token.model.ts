@@ -1,5 +1,5 @@
 import { sequelize } from "@/db/sequelize";
-import { DataTypes, Model, type Optional } from "sequelize";
+import { DataTypes, Model } from "sequelize";
 import UserCredentials from "@/models/user-credentials.model";
 export interface RefreshTokenAttributes{
   id:string,
@@ -10,7 +10,7 @@ export interface RefreshTokenAttributes{
   updatedAt:Date,
 }
 
-export type RefreshTokenCreationAttributes = Optional<RefreshTokenAttributes, "id" | "createdAt" | "updatedAt">;
+export type RefreshTokenCreationAttributes = Partial<RefreshTokenAttributes>;
 
 export class RefreshToken extends Model<RefreshTokenAttributes, RefreshTokenCreationAttributes> implements RefreshTokenAttributes{
   declare id:string;
@@ -21,7 +21,7 @@ export class RefreshToken extends Model<RefreshTokenAttributes, RefreshTokenCrea
   declare updatedAt:Date;
 }
 
-RefreshToken.init(
+(RefreshToken as typeof Model).init(
   {
     id: {
       type: DataTypes.UUID,
@@ -56,15 +56,4 @@ RefreshToken.init(
   }
 )
 
-UserCredentials.hasMany(RefreshToken,{
-  foreignKey: "userId",
-  as: "refreshTokens",
-  onDelete:"CASCADE"
-})
-
-RefreshToken.belongsTo(UserCredentials,{
-  foreignKey: "userId",
-  as: "user",
-  onDelete:"CASCADE"
-})
 export default RefreshToken;

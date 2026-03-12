@@ -1,8 +1,8 @@
 import { sequelize } from "@/db/sequelize";
 import type { User } from "@/types/user";
-import { DataTypes, Model, type Optional } from "sequelize";
+import { DataTypes, Model } from "sequelize";
 
-export type UserCreationAttributes = Optional<User, "id" | "createdAt" | "updatedAt">;
+export type UserCreationAttributes = Partial<User>;
 
 export class UserModel extends Model<User, UserCreationAttributes> implements User{
   declare id: string;

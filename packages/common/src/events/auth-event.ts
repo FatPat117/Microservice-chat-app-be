@@ -1,4 +1,4 @@
-import { EventPayload, OutboundEvent } from "./event-types";
+import { EventPayload, OutboundEvent } from "./event-types.js";
 
 export const AUTH_EVENT_EXCHANGE='auth.events';
 export const AUTH_USER_REGISTER_ROUTING_KEY='auth.user.registered';

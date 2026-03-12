@@ -1,6 +1,6 @@
 import type { NextFunction, Request, Response } from 'express';
 import { ZodError, type ZodIssue, type ZodObject, type ZodTypeAny } from 'zod';
-import { HttpError } from '../errors/http-error';
+import { HttpError } from '../errors/http-error.js';
 
 /**
  * Kiểu schema tổng quát dùng cho body/params/query (Zod object hoặc bất kỳ Zod type nào).

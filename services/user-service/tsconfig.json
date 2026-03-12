@@ -4,6 +4,7 @@
     "rootDir":"src",
     "outDir":"dist",
     "tsBuildInfoFile":"dist/tsconfig.tsbuildinfo",
+    "noImplicitAny": false,
     "declaration":true,
     "declarationMap":true,
     "composite":true,
@@ -13,8 +14,6 @@
     }
   },
   "include":["src"],
-  "references":[
-    {"path":"../../packages/common"}
-  ]
+  "exclude":["dist","node_modules"]
 }
 

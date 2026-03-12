@@ -3,14 +3,19 @@ import type { CreateUserInput, User } from "@/types/user";
 
 import { publishUserCreatedEvent } from "@/messaging/event-publisher";
 import { userRepository } from "@/repositories/user.repository";
-import { AuthUserRegisteredPayload, HttpError, UserCreatedPayload } from "@chatapp/common";
+import { HttpError } from "@chatapp/common";
 import { UniqueConstraintError } from "sequelize";
 
 class UserService{
   constructor(private readonly repository:UserRepository){}
 
   // Sync User From Auth Service
-  async syncFromAuthUser(payload:AuthUserRegisteredPayload):Promise<User>{
+  async syncFromAuthUser(payload:{
+    id:string;
+    email:string;
+    displayName:string;
+    createdAt:string;
+  }):Promise<User>{
     const user = await this.repository.upsertFromAuthEvent(payload);
     
     void publishUserCreatedEvent({
@@ -18,7 +23,7 @@ class UserService{
       email:user.email,
       displayName:user.displayName,
       createdAt:user.createdAt.toISOString(),
-    } as UserCreatedPayload)
+    })
     return user;
   }
 
@@ -48,7 +53,7 @@ class UserService{
         email:user.email,
         displayName:user.displayName,
         createdAt:user.createdAt.toISOString(),
-      } as UserCreatedPayload)
+      })
       
     return user;
     } catch (error) {

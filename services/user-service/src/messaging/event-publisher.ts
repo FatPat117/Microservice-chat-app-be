@@ -1,16 +1,16 @@
 import { env } from "@/configs/env";
 import { logger } from "@/utils/logger";
-import { USER_CREATED_ROUTING_KEY, USER_EVENT_EXCHANGE, UserCreatedEvent, UserCreatedPayload } from "@chatapp/common";
-import { Connection, connect, type Channel, type ChannelModel } from "amqplib";
+import { USER_CREATED_ROUTING_KEY, USER_EVENT_EXCHANGE } from "@chatapp/common";
+import { connect } from "amqplib";
 
 
-type ManagedConnection = Connection & Pick<ChannelModel,'close' | 'createChannel'>
+type ManagedConnection = any;
 let connection : ManagedConnection | null = null;
-let channel:Channel| null = null;
+let channel:any| null = null;
 
 const messagingEnabled = Boolean(env.RABBITMQ_URL)
 
-const ensureChannel = async () : Promise<Channel | null>  => {
+const ensureChannel = async () : Promise<any | null>  => {
   if(!messagingEnabled){
     logger.warn("User service: Messaging is disabled, skipping event publication");
     return null;
@@ -68,7 +68,7 @@ export const closeMessaging = async () =>{
 
   try {
     if(channel){
-      const currentChannel: Channel = channel;
+      const currentChannel = channel;
       channel=null;
       await currentChannel.close();
     }
@@ -84,7 +84,12 @@ export const closeMessaging = async () =>{
 }
 }
 
-export const publishUserCreatedEvent = async (payload:UserCreatedPayload) =>{
+export const publishUserCreatedEvent = async (payload:{
+  id:string;
+  email:string;
+  displayName:string;
+  createdAt:string;
+}) =>{
   const ch = await ensureChannel();
 
   if(!ch){
@@ -92,7 +97,7 @@ export const publishUserCreatedEvent = async (payload:UserCreatedPayload) =>{
     return;
   }
 
-  const event:UserCreatedEvent = {
+  const event = {
     type:USER_CREATED_ROUTING_KEY,
     payload:payload,
     occurredAt:new Date().toISOString(),

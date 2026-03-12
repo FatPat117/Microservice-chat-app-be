@@ -1,11 +1,11 @@
 import { env } from '@/configs/env';
 import bcrypt from 'bcrypt';
-import jwt, { type Secret, type SignOptions } from 'jsonwebtoken';
+import jwt from 'jsonwebtoken';
 
-const ACCESS_TOKEN_SECRET:Secret = env.JWT_SECRET;
-const REFRESH_TOKEN_SECRET:Secret = env.JWT_REFRESH_SECRET;
-export const ACCESS_OPTIONS:SignOptions = {expiresIn:env.JWT_EXPIRES_IN as SignOptions['expiresIn']}
-export const REFRESH_OPTIONS:SignOptions = {expiresIn:env.JWT_REFRESH_EXPIRES_IN as SignOptions['expiresIn']}
+const ACCESS_TOKEN_SECRET = env.JWT_SECRET;
+const REFRESH_TOKEN_SECRET = env.JWT_REFRESH_SECRET;
+export const ACCESS_OPTIONS = {expiresIn:env.JWT_EXPIRES_IN};
+export const REFRESH_OPTIONS = {expiresIn:env.JWT_REFRESH_EXPIRES_IN};
 
 export interface AccessTokenPayload{
   sub:string, // userId

@@ -1,21 +1,21 @@
 import { login, refreshTokens, register, revokeRefreshToken } from "@/services/auth.service";
 import { LoginInput, RegisterInput } from "@/types/auth";
 import { HttpError, asyncHandler } from "@chatapp/common";
-import type { RequestHandler } from "express";
+import type { NextFunction, Request, RequestHandler, Response } from "express";
 
-export const registerHandler: RequestHandler = asyncHandler(async (req, res, _next) => {
+export const registerHandler: RequestHandler = asyncHandler(async (req: Request, res: Response, _next: NextFunction) => {
   const payload = req.body as RegisterInput;
   const tokens = await register(payload);
   res.status(201).json(tokens);
 });
 
-export const loginHandler: RequestHandler = asyncHandler(async (req, res, _next) => {
+export const loginHandler: RequestHandler = asyncHandler(async (req: Request, res: Response, _next: NextFunction) => {
   const payload = req.body as LoginInput;
   const tokens = await login(payload);
   res.status(200).json(tokens);
 })
 
-export const refreshTokensHandler: RequestHandler = asyncHandler(async (req, res, next) => {
+export const refreshTokensHandler: RequestHandler = asyncHandler(async (req: Request, res: Response, next: NextFunction) => {
   const refreshToken = req.body.refreshToken;
   if(!refreshToken){
     return next(new HttpError(400, "Refresh token is required"));
@@ -24,7 +24,7 @@ export const refreshTokensHandler: RequestHandler = asyncHandler(async (req, res
   res.status(200).json(tokens);
 })
 
-export const revokeRefreshTokenHandler: RequestHandler = asyncHandler(async (req, res, next) => {
+export const revokeRefreshTokenHandler: RequestHandler = asyncHandler(async (req: Request, res: Response, next: NextFunction) => {
   const userId = req.body.userId;
   if(!userId){
     return next(new HttpError(401, "Unauthorized"));

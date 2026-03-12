@@ -1,10 +1,12 @@
 import { userService } from "@/services/user.service";
 import { CreateUserInput } from "@/types/user";
 import { SearchUsersQuery, UserIdParams } from "@/validation/user.schema";
-import { AsyncHandler, HttpError } from "@chatapp/common";
-import type { NextFunction } from "express";
+import { HttpError } from "@chatapp/common";
+import type { NextFunction, Request, Response } from "express";
 
-export const getUserById : AsyncHandler =async (req, res,next:NextFunction) =>{
+type AsyncHandlerLocal = (req: Request, res: Response, next: NextFunction) => Promise<void>;
+
+export const getUserById : AsyncHandlerLocal =async (req, res,next:NextFunction) =>{
 try {
     const {id} = req.params as unknown as UserIdParams;
     const user = await userService.getUserById(id);
@@ -17,7 +19,7 @@ try {
 }
 }
 
-export const getAllUsers : AsyncHandler = async (req, res,next:NextFunction) =>{
+export const getAllUsers : AsyncHandlerLocal = async (_req, res,next:NextFunction) =>{
 try {
   const users = await userService.getAllUsers();
   res.status(200).json(users);
@@ -26,7 +28,7 @@ try {
 }
 }
 
-export const createUser : AsyncHandler = async (req, res,next:NextFunction) =>{
+export const createUser : AsyncHandlerLocal = async (req, res,next:NextFunction) =>{
 try {
   const {email, displayName} = req.body as unknown as CreateUserInput;
   const user = await userService.createUser({email, displayName} as CreateUserInput);
@@ -36,7 +38,7 @@ try {
 }
 }
 
-export const searchUsers : AsyncHandler = async (req, res,next:NextFunction) =>{
+export const searchUsers : AsyncHandlerLocal = async (req, res,next:NextFunction) =>{
 try {
   const {query, exclude, limit} = req.query as unknown as SearchUsersQuery;
   const users = await userService.searchUsers({query, excludeIds:exclude, limit});
