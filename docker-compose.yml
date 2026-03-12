@@ -142,6 +142,32 @@ services:
       timeout: 5s
       retries: 5
       start_period: 15s
+
+  chat-service:
+    build:
+      context: .
+      dockerfile: services/chat-service/Dockerfile
+    container_name: chatapp-chat-service
+    env_file:
+      - services/chat-service/.env
+    environment:
+      RABBITMQ_URL: amqp://chatapp_user:chatapp_password@chatapp-rabbitmq:5672/
+      MONGO_URL: mongodb://chatapp_root_user:chatapp_root_password@chatapp-mongo:27017/chatapp_database?authSource=admin
+      REDIS_URL: redis://chatapp-redis:6379
+    depends_on:
+      - rabbitmq
+      - mongo
+      - redis
+    ports:
+      - ${CHAT_SERVICE_PORT:-4002}:4002
+    networks:
+      - chatapp-network
+    healthcheck:
+      test: ["CMD-SHELL", "curl -fsS http://localhost:4002/health || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 15s
 volumes:
   user-db-data:
   auth-db-data:
